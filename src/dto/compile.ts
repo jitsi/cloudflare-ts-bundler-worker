@@ -19,7 +19,12 @@ export const CompileResponseSchema = z.union([
   CompileErrorResponseSchema
 ]);
 
+export const CompileFileRequestSchema = z.object({
+  filename: z.string().min(1, 'Filename is required')
+});
+
 export type CompileRequest = z.infer<typeof CompileRequestSchema>;
+export type CompileFileRequest = z.infer<typeof CompileFileRequestSchema>;
 export type CompileSuccessResponse = z.infer<typeof CompileSuccessResponseSchema>;
 export type CompileErrorResponse = z.infer<typeof CompileErrorResponseSchema>;
 export type CompileResponse = z.infer<typeof CompileResponseSchema>;

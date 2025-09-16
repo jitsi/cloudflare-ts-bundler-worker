@@ -3,6 +3,7 @@ import { corsHeaders } from './constants/cors';
 import { BundlerService } from './service/bundler-service';
 import {
   CompileRequestSchema,
+  CompileFileRequestSchema,
   CompileSuccessResponse,
   CompileErrorResponse
 } from './dto/compile';
@@ -38,6 +39,101 @@ router.post('/compile', async (request: any, env: any) => {
 
     const { code } = parseResult.data;
     console.info(`[${requestId}] Starting TypeScript compilation`, { codeLength: code.length });
+
+    try {
+      console.debug(`[${requestId}] Using bundler service for compilation`);
+
+      const bundler = await BundlerService.getInstance();
+      const compiledCode = await bundler.compile(code);
+
+      console.info(`[${requestId}] Compilation successful`, {
+        originalLength: code.length,
+        compiledLength: compiledCode.length,
+      });
+
+      const response: CompileSuccessResponse = {
+        success: true,
+        compiledCode: compiledCode,
+      };
+
+      return Response.json(response, {
+        status: 200,
+        headers: corsHeaders
+      });
+
+    } catch (compileError) {
+      const errorMessage = compileError instanceof Error ? compileError.message : 'Unknown compilation error';
+      console.error(`[${requestId}] Compilation failed`, compileError);
+
+      const response: CompileErrorResponse = {
+        success: false,
+        error: `Compilation failed: ${errorMessage}`
+      };
+
+      return Response.json(response, {
+        status: 500,
+        headers: corsHeaders
+      });
+    }
+
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    console.error(`[${requestId}] Unexpected server error`, error);
+
+    const response: CompileErrorResponse = {
+      success: false,
+      error: `Server error: ${errorMessage}`
+    };
+
+    return Response.json(response, {
+      status: 500,
+      headers: corsHeaders
+    });
+  }
+});
+
+router.post('/compile-file', async (request: any, env: any) => {
+  const requestId = crypto.randomUUID().slice(0, 8);
+
+  console.info(`[${requestId}] File upload compilation request started`);
+
+  try {
+    const formData = await request.formData();
+    const file = formData.get('file');
+    const filenameFromForm = formData.get('filename');
+
+    if (!file || !(file instanceof File)) {
+      const response: CompileErrorResponse = {
+        success: false,
+        error: 'File is required'
+      };
+
+      return Response.json(response, {
+        status: 400,
+        headers: corsHeaders
+      });
+    }
+
+    const filename = filenameFromForm || file.name || 'unknown.ts';
+    const code = await file.text();
+
+    if (!code || code.trim().length === 0) {
+      const response: CompileErrorResponse = {
+        success: false,
+        error: 'File content cannot be empty'
+      };
+
+      return Response.json(response, {
+        status: 400,
+        headers: corsHeaders
+      });
+    }
+
+    console.info(`[${requestId}] Starting TypeScript compilation`, {
+      codeLength: code.length,
+      filename,
+      fileSize: file.size
+    });
 
     try {
       console.debug(`[${requestId}] Using bundler service for compilation`);
