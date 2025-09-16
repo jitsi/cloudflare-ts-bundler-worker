@@ -14,5 +14,10 @@
 		"typescript": "^5.5.2",
 		"vitest": "~3.2.0",
 		"wrangler": "^4.37.1"
+	},
+	"dependencies": {
+		"esbuild-wasm": "^0.25.9",
+		"itty-router": "^5.0.22",
+		"zod": "^4.1.8"
 	}
 }
