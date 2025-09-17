@@ -38,7 +38,7 @@ export class BundlerService {
       treeShaking: true,
       platform: 'browser',
       conditions: ['worker', 'browser'],
-      drop: ['console', 'debugger'],
+      drop: ['debugger'],
       legalComments: 'none',
       plugins: [
         CDNImports({
