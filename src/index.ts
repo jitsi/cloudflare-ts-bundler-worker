@@ -3,7 +3,6 @@ import { corsHeaders } from './constants/cors';
 import { BundlerService } from './service/bundler-service';
 import {
   CompileRequestSchema,
-  CompileFileRequestSchema,
   CompileSuccessResponse,
   CompileErrorResponse
 } from './dto/compile';
@@ -100,7 +99,6 @@ router.post('/compile-file', async (request: any, env: any) => {
   try {
     const formData = await request.formData();
     const file = formData.get('file');
-    const filenameFromForm = formData.get('filename');
 
     if (!file || !(file instanceof File)) {
       const response: CompileErrorResponse = {
@@ -114,7 +112,7 @@ router.post('/compile-file', async (request: any, env: any) => {
       });
     }
 
-    const filename = filenameFromForm || file.name || 'unknown.ts';
+    const filename = file.name || 'unknown.ts';
     const code = await file.text();
 
     if (!code || code.trim().length === 0) {
@@ -146,14 +144,15 @@ router.post('/compile-file', async (request: any, env: any) => {
         compiledLength: compiledCode.length,
       });
 
-      const response: CompileSuccessResponse = {
-        success: true,
-        compiledCode: compiledCode,
-      };
+      const outputFilename = filename.replace(/\.ts$/, '.js').replace(/\.tsx$/, '.js');
 
-      return Response.json(response, {
+      return new Response(compiledCode, {
         status: 200,
-        headers: corsHeaders
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/javascript',
+          'Content-Disposition': `attachment; filename="${outputFilename}"`,
+        }
       });
 
     } catch (compileError) {
