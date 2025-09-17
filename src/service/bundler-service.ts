@@ -1,5 +1,6 @@
 import * as esbuild from 'esbuild-wasm';
 import wasm from "../../node_modules/esbuild-wasm/esbuild.wasm";
+import { CDNImports } from 'esbuild-plugin-cdn-imports';
 
 export class BundlerService {
   private static instance: BundlerService;
@@ -34,6 +35,17 @@ export class BundlerService {
       bundle: true,
       minify: true,
       write: false,
+      treeShaking: true,
+      platform: 'browser',
+      conditions: ['worker', 'browser'],
+      drop: ['console', 'debugger'],
+      legalComments: 'none',
+      plugins: [
+        CDNImports({
+          cdn: 'esm',
+          versions: {}
+        })
+      ],
       stdin: {
         contents: code,
         loader: "ts",
