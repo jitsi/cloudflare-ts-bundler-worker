@@ -11,7 +11,7 @@ const router = Router();
 
 router.options('*', () => new Response(null, { headers: corsHeaders }));
 
-router.post('/compile', async (request: any, env: any) => {
+router.post('/_cfw/cf-ts-bundler-worker/compile', async (request: any, env: any) => {
   const requestId = crypto.randomUUID().slice(0, 8);
 
   console.info(`[${requestId}] TypeScript compilation request started`);
@@ -91,7 +91,7 @@ router.post('/compile', async (request: any, env: any) => {
   }
 });
 
-router.post('/compile-file', async (request: any, env: any) => {
+router.post('/_cfw/cf-ts-bundler-worker/compile-file', async (request: any, env: any) => {
   const requestId = crypto.randomUUID().slice(0, 8);
 
   console.info(`[${requestId}] File upload compilation request started`);
