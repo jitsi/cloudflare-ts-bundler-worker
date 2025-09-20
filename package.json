@@ -16,9 +16,10 @@
 		"wrangler": "^4.37.1"
 	},
 	"dependencies": {
+		"chanfana": "^2.8.2",
 		"esbuild-plugin-cdn-imports": "^2.0.0",
 		"esbuild-wasm": "^0.25.9",
 		"itty-router": "^5.0.22",
-		"zod": "^4.1.8"
+		"zod": "^3.25.76"
 	}
 }

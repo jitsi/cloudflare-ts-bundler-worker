@@ -2,21 +2,16 @@ import { Router } from 'itty-router';
 import { corsHeaders } from './constants/cors';
 import { compileRouter } from './routes/compile';
 
-const router = Router({ base: '/_cfw/cf-ts-bundler-worker' });
+const mainRouter = Router();
 
-router.options('*', () => new Response(null, { headers: corsHeaders }));
+mainRouter.options('*', () => new Response(null, { headers: corsHeaders }));
 
-// Health check
-router.get('/health', () => new Response('OK'));
+// mount API routes
+mainRouter.all('*', compileRouter.fetch);
 
-// Mount API routes
-router.all('*', compileRouter.fetch);
+// default handler
+mainRouter.all('*', () => Response.json({ success: false, error: 'Invalid endpoint' }, { status: 404 }));
 
-router.all('*', () =>
-  Response.json(
-    { success: false, error: 'Invalid endpoint' },
-    { status: 404, headers: corsHeaders }
-  )
-);
-
-export default { ...router };
+export default {
+  fetch: mainRouter.fetch
+}
