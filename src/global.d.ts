@@ -1,8 +1,8 @@
-declare module "*.wasm" {
+declare module '*.wasm' {
 	const value: WebAssembly.Module;
 	export default value;
 }
 
 declare namespace globalThis {
-    var performance: typeof Date;
+	var performance: typeof Date;
 }

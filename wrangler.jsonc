@@ -3,12 +3,10 @@
 	"name": "cf-ts-bundler-worker",
 	"main": "src/index.ts",
 	"compatibility_date": "2025-09-13",
-	"compatibility_flags": [
-    "nodejs_compat"
-  	],
+	"compatibility_flags": ["nodejs_compat"],
 	"minify": true,
 	"workers_dev": true,
 	"observability": {
-		"enabled": true
-	}
+		"enabled": true,
+	},
 }

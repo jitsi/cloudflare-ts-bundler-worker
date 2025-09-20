@@ -10,217 +10,195 @@ extendZodWithOpenApi(z);
 const API_BASE_PATH = '/_cfw/cf-ts-bundler-worker';
 
 import {
-  CompileRequestSchema,
-  CompileSuccessResponseSchema,
-  CompileErrorResponseSchema,
-  CompileFileRequestSchema,
-  CompiledJavaScriptResponseSchema
+	CompileRequestSchema,
+	CompileSuccessResponseSchema,
+	CompileErrorResponseSchema,
+	CompileFileRequestSchema,
+	CompiledJavaScriptResponseSchema,
 } from '@/dtos/compile';
 
 class CompileEndpoint extends OpenAPIRoute {
-  schema = {
-    tags: ['TypeScript Compilation'],
-    summary: 'Compile TypeScript to JavaScript',
-    description: 'Compiles TypeScript code to JavaScript using esbuild with CDN imports support',
-    request: {
-      body: contentJson(CompileRequestSchema),
-    },
-    responses: {
-      '200': {
-        description: 'Compilation successful',
-        ...contentJson(CompileSuccessResponseSchema),
-      },
-      '400': {
-        description: 'Request validation failed',
-        ...contentJson(CompileErrorResponseSchema),
-      },
-      '422': {
-        description: 'Compilation failed',
-        ...contentJson(CompileErrorResponseSchema),
-      },
-      '500': {
-        description: 'Internal server error',
-        ...contentJson(CompileErrorResponseSchema),
-      }
-    }
-  };
+	schema = {
+		tags: ['TypeScript Compilation'],
+		summary: 'Compile TypeScript to JavaScript',
+		description: 'Compiles TypeScript code to JavaScript using esbuild with CDN imports support',
+		request: {
+			body: contentJson(CompileRequestSchema),
+		},
+		responses: {
+			'200': {
+				description: 'Compilation successful',
+				...contentJson(CompileSuccessResponseSchema),
+			},
+			'500': {
+				description: 'Internal server error',
+				...contentJson(CompileErrorResponseSchema),
+			},
+		},
+	};
 
-  async handle(_request: Request, _env: any, _ctx: any) {
-    const requestId = crypto.randomUUID().slice(0, 8);
-    console.info(`[${requestId}] TypeScript compilation request started`);
+	async handle(_request: Request, _env: any, _ctx: any) {
+		const requestId = crypto.randomUUID().slice(0, 8);
+		console.info(`[${requestId}] TypeScript compilation request started`);
 
-    try {
-      const data = await this.getValidatedData<typeof this.schema>();
-      const { code } = data.body;
-      console.info(`[${requestId}] Starting TypeScript compilation`, { codeLength: code.length });
+		try {
+			const data = await this.getValidatedData<typeof this.schema>();
+			const { code } = data.body;
+			console.info(`[${requestId}] Starting TypeScript compilation`, { codeLength: code.length });
 
-      try {
-        console.debug(`[${requestId}] Using bundler service for compilation`);
+			console.debug(`[${requestId}] Using bundler service for compilation`);
+			const bundler = await BundlerService.getInstance();
+			const compiledCode = await bundler.compile(code);
 
-        const bundler = await BundlerService.getInstance();
-        const compiledCode = await bundler.compile(code);
+			console.info(`[${requestId}] Compilation successful`, {
+				originalLength: code.length,
+				compiledLength: compiledCode.length,
+			});
 
-        console.info(`[${requestId}] Compilation successful`, {
-          originalLength: code.length,
-          compiledLength: compiledCode.length,
-        });
+			return {
+				success: true,
+				compiledCode: compiledCode,
+			};
+		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+			console.error(`[${requestId}] Request failed`, error);
 
-        return {
-          success: true,
-          compiledCode: compiledCode,
-        };
-
-      } catch (compileError) {
-        const errorMessage = compileError instanceof Error ? compileError.message : 'Unknown compilation error';
-        console.error(`[${requestId}] Compilation failed`, compileError);
-
-        return Response.json({
-          success: false,
-          error: `Compilation failed: ${errorMessage}`
-        }, { status: 422 });
-      }
-
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-      console.error(`[${requestId}] Unexpected server error`, error);
-
-      return Response.json({
-        success: false,
-        error: `Server error: ${errorMessage}`
-      }, { status: 500 });
-    }
-  }
+			// TODO: Implement proper error handling with specific status codes
+			// Currently returning 500 for all errors for simplicity
+			return Response.json(
+				{
+					success: false,
+					error: errorMessage,
+				},
+				{ status: 500 },
+			);
+		}
+	}
 }
 
 class CompileFileEndpoint extends OpenAPIRoute {
-  schema = {
-    tags: ['TypeScript Compilation'],
-    summary: 'Compile TypeScript file to JavaScript',
-    description: 'Upload a TypeScript file via multipart/form-data and download the compiled JavaScript',
-    request: {
-      body: {
-        content: {
-          'multipart/form-data': {
-            schema: CompileFileRequestSchema
-          }
-        }
-      }
-    },
-    responses: {
-      '200': {
-        description: 'Compiled JavaScript file',
-        content: {
-          'application/javascript': {
-            schema: CompiledJavaScriptResponseSchema
-          }
-        }
-      },
-      '400': {
-        description: 'File validation failed',
-        ...contentJson(CompileErrorResponseSchema),
-      },
-      '422': {
-        description: 'Compilation failed',
-        ...contentJson(CompileErrorResponseSchema),
-      },
-      '500': {
-        description: 'Internal server error',
-        ...contentJson(CompileErrorResponseSchema),
-      }
-    }
-  };
+	schema = {
+		tags: ['TypeScript Compilation'],
+		summary: 'Compile TypeScript file to JavaScript',
+		description: 'Upload a TypeScript file via multipart/form-data and download the compiled JavaScript',
+		request: {
+			body: {
+				content: {
+					'multipart/form-data': {
+						schema: CompileFileRequestSchema,
+					},
+				},
+			},
+		},
+		responses: {
+			'200': {
+				description: 'Compiled JavaScript file',
+				content: {
+					'application/javascript': {
+						schema: CompiledJavaScriptResponseSchema,
+					},
+				},
+			},
+			'400': {
+				description: 'Bad request - invalid file or empty content',
+				...contentJson(CompileErrorResponseSchema),
+			},
+			'500': {
+				description: 'Internal server error',
+				...contentJson(CompileErrorResponseSchema),
+			},
+		},
+	};
 
-  async handle(request: Request, _env: any, _ctx: any) {
-    const requestId = crypto.randomUUID().slice(0, 8);
-    console.info(`[${requestId}] File upload compilation request started`);
+	async handle(request: Request, _env: any, _ctx: any) {
+		const requestId = crypto.randomUUID().slice(0, 8);
+		console.info(`[${requestId}] File upload compilation request started`);
 
-    try {
-      // Get validated data - chanfana does not support multipart/form-data validation
-      // So we'll parse manually but use the schema for documentation
-      const formData = await request.formData();
-      const file = formData.get('file');
+		try {
+			// Get validated data - chanfana does not support multipart/form-data validation
+			// So we'll parse manually but use the schema for documentation
+			const formData = await request.formData();
+			const file = formData.get('file');
 
-      if (!file || !(file instanceof File)) {
-        return Response.json({
-          success: false,
-          error: 'File is required'
-        }, { status: 400 });
-      }
+			if (!file || !(file instanceof File)) {
+				return Response.json(
+					{
+						success: false,
+						error: 'File is required',
+					},
+					{ status: 400 },
+				);
+			}
 
-      const filename = file.name || 'unknown.ts';
-      const code = await file.text();
+			const filename = file.name || 'unknown.ts';
+			const code = await file.text();
 
-      if (!code || code.trim().length === 0) {
-        return Response.json({
-          success: false,
-          error: 'File content cannot be empty'
-        }, { status: 400 });
-      }
+			if (!code || code.trim().length === 0) {
+				return Response.json(
+					{
+						success: false,
+						error: 'File content cannot be empty',
+					},
+					{ status: 400 },
+				);
+			}
 
-      console.info(`[${requestId}] Starting TypeScript compilation`, {
-        codeLength: code.length,
-        filename,
-        fileSize: file.size
-      });
+			console.info(`[${requestId}] Starting TypeScript compilation`, {
+				codeLength: code.length,
+				filename,
+				fileSize: file.size,
+			});
 
-      try {
-        console.debug(`[${requestId}] Using bundler service for compilation`);
+			console.debug(`[${requestId}] Using bundler service for compilation`);
 
-        const bundler = await BundlerService.getInstance();
-        const compiledCode = await bundler.compile(code);
+			const bundler = await BundlerService.getInstance();
+			const compiledCode = await bundler.compile(code);
 
-        console.info(`[${requestId}] Compilation successful`, {
-          originalLength: code.length,
-          compiledLength: compiledCode.length,
-        });
+			console.info(`[${requestId}] Compilation successful`, {
+				originalLength: code.length,
+				compiledLength: compiledCode.length,
+			});
 
-        const outputFilename = filename.replace(/\.ts$/, '.js');
+			const outputFilename = filename.replace(/\.ts$/, '.js');
 
-        return new Response(compiledCode, {
-          status: 200,
-          headers: {
-            'Content-Type': 'application/javascript',
-            'Content-Disposition': `attachment; filename="${outputFilename}"`,
-          }
-        });
+			return new Response(compiledCode, {
+				status: 200,
+				headers: {
+					'Content-Type': 'application/javascript',
+					'Content-Disposition': `attachment; filename="${outputFilename}"`,
+				},
+			});
+		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+			console.error(`[${requestId}] Request failed`, error);
 
-      } catch (compileError) {
-        const errorMessage = compileError instanceof Error ? compileError.message : 'Unknown compilation error';
-        console.error(`[${requestId}] Compilation failed`, compileError);
-
-        return Response.json({
-          success: false,
-          error: `Compilation failed: ${errorMessage}`
-        }, { status: 422 });
-      }
-
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-      console.error(`[${requestId}] Unexpected server error`, error);
-
-      return Response.json({
-        success: false,
-        error: `Server error: ${errorMessage}`
-      }, { status: 500 });
-    }
-  }
+			// TODO: Implement proper error handling with specific status codes
+			// Currently returning 500 for all errors for simplicity
+			return Response.json(
+				{
+					success: false,
+					error: errorMessage,
+				},
+				{ status: 500 },
+			);
+		}
+	}
 }
 
 const router = Router();
 
 const openapi = fromIttyRouter(router, {
-  docs_url: `${API_BASE_PATH}/docs`,
-  redoc_url: `${API_BASE_PATH}/redoc`,
-  openapi_url: `${API_BASE_PATH}/openapi.json`,
-  schema: {
-    info: {
-      title: 'TypeScript Bundler API',
-      description: 'Cloudflare Worker for compiling TypeScript to JavaScript using esbuild',
-      version: '1.0.0',
-    },
-  },
+	docs_url: `${API_BASE_PATH}/docs`,
+	redoc_url: `${API_BASE_PATH}/redoc`,
+	openapi_url: `${API_BASE_PATH}/openapi.json`,
+	schema: {
+		info: {
+			title: 'TypeScript Bundler API',
+			description: 'Cloudflare Worker for compiling TypeScript to JavaScript using esbuild',
+			version: '1.0.0',
+		},
+	},
 });
-
 
 openapi.post(`${API_BASE_PATH}/compile`, CompileEndpoint);
 openapi.post(`${API_BASE_PATH}/compile-file`, CompileFileEndpoint);

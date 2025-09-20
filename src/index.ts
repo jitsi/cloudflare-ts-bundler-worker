@@ -13,5 +13,5 @@ mainRouter.all('*', compileRouter.fetch);
 mainRouter.all('*', () => Response.json({ success: false, error: 'Invalid endpoint' }, { status: 404 }));
 
 export default {
-  fetch: mainRouter.fetch
-}
+	fetch: mainRouter.fetch,
+};

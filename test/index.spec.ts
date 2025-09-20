@@ -26,7 +26,7 @@ describe('TypeScript Bundler Worker', () => {
 		const result = await response.json();
 		expect(result).toMatchObject({
 			success: true,
-			compiledCode: expect.any(String)
+			compiledCode: expect.any(String),
 		});
 		// Check that it contains some version of the variable and console.log
 		expect(result.compiledCode).toContain('="world"');
@@ -52,7 +52,7 @@ describe('TypeScript Bundler Worker', () => {
 		const result = await response.json();
 		expect(result).toMatchObject({
 			success: false,
-			error: expect.stringContaining('Server error')
+			error: expect.stringContaining('Server error'),
 		});
 	});
 
@@ -68,8 +68,8 @@ describe('TypeScript Bundler Worker', () => {
 			openapi: expect.stringMatching(/^3\./),
 			info: {
 				title: 'TypeScript Bundler API',
-				version: '1.0.0'
-			}
+				version: '1.0.0',
+			},
 		});
 	});
 });

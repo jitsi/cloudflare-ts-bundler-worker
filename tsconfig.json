@@ -15,11 +15,11 @@
 		"moduleResolution": "Bundler",
 		/* Enable importing .json files */
 		"resolveJsonModule": true,
-		 /* Path mapping */
-        "baseUrl": ".",
-        "paths": {
-            "@/*": ["src/*"]
-        },
+		/* Path mapping */
+		"baseUrl": ".",
+		"paths": {
+			"@/*": ["src/*"]
+		},
 
 		/* Allow JavaScript files to be a part of your program. Use the `checkJS` option to get errors from these files. */
 		"allowJs": true,
@@ -41,13 +41,9 @@
 
 		/* Skip type checking all .d.ts files. */
 		"skipLibCheck": true,
-		"types": [
-			"./worker-configuration.d.ts"
-		]
+		"types": ["./worker-configuration.d.ts"]
 	},
-	"files": [
-        "src/global.d.ts"
-    ],
+	"files": ["src/global.d.ts"],
 	"exclude": ["test"],
 	"include": ["worker-configuration.d.ts", "src/**/*.ts"]
 }
