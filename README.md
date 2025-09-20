@@ -1,6 +1,6 @@
 # cf-ts-bundler-worker
 
-A fast, lightweight Cloudflare Worker that compiles TypeScript to JavaScript using esbuild with CDN imports support.
+A fast, lightweight Cloudflare Worker that runs esbuild on the edge to compile TypeScript to JavaScript with CDN imports support.
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.5-blue)](https://www.typescriptlang.org/)
@@ -8,11 +8,11 @@ A fast, lightweight Cloudflare Worker that compiles TypeScript to JavaScript usi
 
 ## Features
 
-- ⚡ Fast TypeScript compilation with esbuild-wasm
+- ⚡ Dynamic TypeScript compilation with esbuild-wasm running on the edge
 - 🌐 Automatic CDN imports resolution
 - 📡 REST API with OpenAPI documentation
 - 📁 File upload support
-- 🌍 CORS enabled for browser usage
+- ☁️ Low-latency compilation powered by Cloudflare's global network
 
 ## Quick Start
 
@@ -49,38 +49,31 @@ Response:
 }
 ```
 
-### JavaScript Client
+### File Upload Compilation (cURL)
 
-```javascript
-export const compileTypeScript = async (code) => {
-  const response = await fetch('/_cfw/cf-ts-bundler-worker/compile', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ code })
-  });
+```bash
+curl -X POST https://your-worker.your-subdomain.workers.dev/_cfw/cf-ts-bundler-worker/compile-file \
+  -F "file=@example.ts"
+```
 
-  const result = await response.json();
-  return result.success ? result.compiledCode : Promise.reject(result.error);
-};
+Response: Returns the compiled JavaScript file for download.
 
-// Example TypeScript code 
-const tsCode = `
+### Example TypeScript File (example.ts)
+
+```typescript
 import { Hono } from 'hono';
 import { z } from 'zod';
 import { zValidator } from '@hono/zod-validator';
 
-interface User {
-  id: string;
-  name: "John";
-  age: number;
-  email?: string;
-}
-
 const userSchema = z.object({
   name: z.literal("John"),
   age: z.number().min(18),
-  email: z.string().email().optional(),
+  email: z.email().optional(),
 });
+
+type User = z.infer<typeof userSchema> & {
+  id: string;
+};
 
 const app = new Hono();
 
@@ -88,33 +81,16 @@ app.get('/', (c) => c.json({ message: 'Hello World!' }));
 
 app.post('/users', zValidator('json', userSchema), (c) => {
   const userData = c.req.valid('json');
+  
   const user: User = {
-    id: \`user-\${crypto.randomUUID().slice(0, 8)}\`,
+    id: `user-${crypto.randomUUID().slice(0, 8)}`,
     ...userData,
   };
+  
   return c.json({ message: 'User created!', user }, 201);
 });
 
 export default app;
-`;
-
-// Compile from string
-compileTypeScript(tsCode)
-  .then(js => console.log('Compiled:', js))
-  .catch(err => console.error('Error:', err));
-
-// Or compile from file upload
-export const compileFile = async (file) => {
-  const formData = new FormData();
-  formData.append('file', file);
-
-  const response = await fetch('/_cfw/cf-ts-bundler-worker/compile-file', {
-    method: 'POST',
-    body: formData
-  });
-
-  return response.ok ? response.text() : Promise.reject(await response.json());
-};
 ```
 
 ## Development
@@ -129,6 +105,12 @@ npm test
 # Deploy
 npm run deploy
 ```
+
+## TODO / Roadmap
+
+- [ ] 📦 Multiple files support - Bundle entire TypeScript projects with multiple files and dependencies
+- [ ] 📊 Compilation performance metrics and caching
+- [ ] 🔧 Custom esbuild configuration options
 
 ## License
 
