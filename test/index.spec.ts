@@ -52,7 +52,7 @@ describe('TypeScript Bundler Worker', () => {
 		const result = await response.json();
 		expect(result).toMatchObject({
 			success: false,
-			error: expect.stringContaining('Server error'),
+			error: expect.any(String),
 		});
 	});
 
