@@ -56,6 +56,8 @@ curl -X POST https://your-worker.your-subdomain.workers.dev/_cfw/cf-ts-bundler-w
   -F "file=@example.ts"
 ```
 
+*Note: Currently supports single file uploads only. Multi-file project bundling is planned for future releases.*
+
 Response: Returns the compiled JavaScript file for download.
 
 ### Example TypeScript File (example.ts)
