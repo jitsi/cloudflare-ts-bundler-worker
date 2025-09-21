@@ -1,6 +1,7 @@
 import { Router } from 'itty-router';
 import { fromIttyRouter, OpenAPIRoute, contentJson, extendZodWithOpenApi } from 'chanfana';
 import { z } from 'zod';
+import { nanoid } from 'nanoid';
 import { BundlerService } from '@/services/bundler-service';
 
 // Extend Zod with OpenAPI support
@@ -38,7 +39,7 @@ class CompileEndpoint extends OpenAPIRoute {
 	};
 
 	async handle(_request: Request, _env: any, _ctx: any) {
-		const requestId = crypto.randomUUID().slice(0, 8);
+		const requestId = nanoid(8);
 		console.info(`[${requestId}] TypeScript compilation request started`);
 
 		try {
@@ -111,7 +112,7 @@ class CompileFileEndpoint extends OpenAPIRoute {
 	};
 
 	async handle(request: Request, _env: any, _ctx: any) {
-		const requestId = crypto.randomUUID().slice(0, 8);
+		const requestId = nanoid(8);
 		console.info(`[${requestId}] File upload compilation request started`);
 
 		try {

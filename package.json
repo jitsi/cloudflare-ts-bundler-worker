@@ -21,6 +21,7 @@
 		"esbuild-plugin-cdn-imports": "^2.0.0",
 		"esbuild-wasm": "^0.25.9",
 		"itty-router": "^5.0.22",
+		"nanoid": "^5.1.5",
 		"zod": "^3.25.76"
 	}
 }
