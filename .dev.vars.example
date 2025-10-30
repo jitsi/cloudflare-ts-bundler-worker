@@ -1,0 +1,11 @@
+# Environment Variables for Local Development
+# Copy this file to .dev.vars and fill in your actual values
+# .dev.vars is gitignored and will not be committed
+
+# JWT Configuration
+JWT_ISSUER=https://your-auth-server.com
+PUBLIC_KEY=-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAn4p8qPqs3JRWyVhNm8BO
+ExamplePublicKeyDataHereReplaceWithYourActualPublicKey123456789
+AQIDAQAB
+-----END PUBLIC KEY-----

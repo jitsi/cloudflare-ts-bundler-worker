@@ -2,6 +2,14 @@ import { contentJson, extendZodWithOpenApi, fromIttyRouter, OpenAPIRoute } from 
 import { Router } from 'itty-router';
 import { nanoid } from 'nanoid';
 import { z } from 'zod';
+import {
+	CompiledJavaScriptResponseSchema,
+	CompileErrorResponseSchema,
+	CompileFileRequestSchema,
+	CompileRequestSchema,
+	CompileSuccessResponseSchema,
+} from '@/dtos/compile';
+import { authMiddleware } from '@/middleware/auth';
 import { BundlerService } from '@/services/bundler-service';
 
 // Extend Zod with OpenAPI support
@@ -10,16 +18,9 @@ extendZodWithOpenApi(z);
 // API base path constant
 const API_BASE_PATH = '/_cfw/cf-ts-bundler-worker';
 
-import {
-	CompiledJavaScriptResponseSchema,
-	CompileErrorResponseSchema,
-	CompileFileRequestSchema,
-	CompileRequestSchema,
-	CompileSuccessResponseSchema,
-} from '@/dtos/compile';
-
 class CompileEndpoint extends OpenAPIRoute {
 	schema = {
+		security: [{ bearerAuth: [] }],
 		tags: ['TypeScript Compilation'],
 		summary: 'Compile TypeScript to JavaScript',
 		description: 'Compiles TypeScript code to JavaScript using esbuild with CDN imports support',
@@ -30,6 +31,10 @@ class CompileEndpoint extends OpenAPIRoute {
 			'200': {
 				description: 'Compilation successful',
 				...contentJson(CompileSuccessResponseSchema),
+			},
+			'401': {
+				description: 'Unauthorized - Invalid or missing JWT token',
+				...contentJson(CompileErrorResponseSchema),
 			},
 			'500': {
 				description: 'Internal server error',
@@ -45,7 +50,9 @@ class CompileEndpoint extends OpenAPIRoute {
 		try {
 			const data = await this.getValidatedData<typeof this.schema>();
 			const { code } = data.body;
-			console.info(`[${requestId}] Starting TypeScript compilation`, { codeLength: code.length });
+			console.info(`[${requestId}] Starting TypeScript compilation`, {
+				codeLength: code.length,
+			});
 
 			console.debug(`[${requestId}] Using bundler service for compilation`);
 			const bundler = await BundlerService.getInstance();
@@ -79,6 +86,7 @@ class CompileEndpoint extends OpenAPIRoute {
 
 class CompileFileEndpoint extends OpenAPIRoute {
 	schema = {
+		security: [{ bearerAuth: [] }],
 		tags: ['TypeScript Compilation'],
 		summary: 'Compile TypeScript file to JavaScript',
 		description: 'Upload a TypeScript file via multipart/form-data and download the compiled JavaScript',
@@ -102,6 +110,10 @@ class CompileFileEndpoint extends OpenAPIRoute {
 			},
 			'400': {
 				description: 'Bad request - invalid file or empty content',
+				...contentJson(CompileErrorResponseSchema),
+			},
+			'401': {
+				description: 'Unauthorized - Invalid or missing JWT token',
 				...contentJson(CompileErrorResponseSchema),
 			},
 			'500': {
@@ -201,6 +213,17 @@ const openapi = fromIttyRouter(router, {
 	},
 });
 
+// Register JWT Bearer authentication security scheme
+openapi.registry.registerComponent('securitySchemes', 'bearerAuth', {
+	type: 'http',
+	scheme: 'bearer',
+	bearerFormat: 'JWT',
+});
+
+// Apply JWT authentication middleware to all API routes
+openapi.all(`${API_BASE_PATH}/*`, authMiddleware);
+
+// Register API endpoints
 openapi.post(`${API_BASE_PATH}/compile`, CompileEndpoint);
 openapi.post(`${API_BASE_PATH}/compile-file`, CompileFileEndpoint);
 

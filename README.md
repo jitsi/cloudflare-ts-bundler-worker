@@ -23,6 +23,54 @@ npm install
 npm run deploy
 ```
 
+## Configuration
+
+### Environment Variables
+
+The worker uses the following environment variables for JWT authentication:
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `JWT_ISSUER` | Expected issuer claim in JWT tokens | Yes |
+| `PUBLIC_KEY` | RSA public key in PEM format (SPKI) for JWT signature verification | Yes |
+
+**Note:** The `PUBLIC_KEY` is a _public_ key and is not sensitive data. Only the corresponding _private_ key (used to sign tokens) needs to be kept secret.
+
+### Local Development
+
+1. Copy the example environment file:
+   ```bash
+   cp .dev.vars.example .dev.vars
+   ```
+
+2. Edit `.dev.vars` with your actual values:
+   ```bash
+   JWT_ISSUER=https://your-auth-server.com
+   PUBLIC_KEY=-----BEGIN PUBLIC KEY-----
+   Your actual RSA public key here
+   -----END PUBLIC KEY-----
+   ```
+
+3. Start the dev server (it will automatically load `.dev.vars`):
+   ```bash
+   npm run dev
+   ```
+
+### Production Deployment
+
+Set environment variables using Wrangler CLI:
+
+```bash
+# Set as secrets (recommended for sensitive data)
+wrangler secret put JWT_ISSUER
+wrangler secret put PUBLIC_KEY
+
+# Or set as regular environment variables
+wrangler deploy --var JWT_ISSUER:https://your-auth-server.com
+```
+
+Alternatively, use the Cloudflare dashboard to set environment variables in your worker settings.
+
 ## API Reference
 
 **Base URL:** `https://your-worker.your-subdomain.workers.dev`
