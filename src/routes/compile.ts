@@ -1,7 +1,7 @@
+import { contentJson, extendZodWithOpenApi, fromIttyRouter, OpenAPIRoute } from 'chanfana';
 import { Router } from 'itty-router';
-import { fromIttyRouter, OpenAPIRoute, contentJson, extendZodWithOpenApi } from 'chanfana';
-import { z } from 'zod';
 import { nanoid } from 'nanoid';
+import { z } from 'zod';
 import { BundlerService } from '@/services/bundler-service';
 
 // Extend Zod with OpenAPI support
@@ -11,11 +11,11 @@ extendZodWithOpenApi(z);
 const API_BASE_PATH = '/_cfw/cf-ts-bundler-worker';
 
 import {
-	CompileRequestSchema,
-	CompileSuccessResponseSchema,
+	CompiledJavaScriptResponseSchema,
 	CompileErrorResponseSchema,
 	CompileFileRequestSchema,
-	CompiledJavaScriptResponseSchema,
+	CompileRequestSchema,
+	CompileSuccessResponseSchema,
 } from '@/dtos/compile';
 
 class CompileEndpoint extends OpenAPIRoute {
@@ -38,7 +38,7 @@ class CompileEndpoint extends OpenAPIRoute {
 		},
 	};
 
-	async handle(_request: Request, _env: any, _ctx: any) {
+	async handle(_request: Request, _env: Env, _ctx: ExecutionContext) {
 		const requestId = nanoid(8);
 		console.info(`[${requestId}] TypeScript compilation request started`);
 
@@ -71,7 +71,7 @@ class CompileEndpoint extends OpenAPIRoute {
 					success: false,
 					error: errorMessage,
 				},
-				{ status: 500 },
+				{ status: 500 }
 			);
 		}
 	}
@@ -111,7 +111,7 @@ class CompileFileEndpoint extends OpenAPIRoute {
 		},
 	};
 
-	async handle(request: Request, _env: any, _ctx: any) {
+	async handle(request: Request, _env: Env, _ctx: ExecutionContext) {
 		const requestId = nanoid(8);
 		console.info(`[${requestId}] File upload compilation request started`);
 
@@ -127,7 +127,7 @@ class CompileFileEndpoint extends OpenAPIRoute {
 						success: false,
 						error: 'File is required',
 					},
-					{ status: 400 },
+					{ status: 400 }
 				);
 			}
 
@@ -140,7 +140,7 @@ class CompileFileEndpoint extends OpenAPIRoute {
 						success: false,
 						error: 'File content cannot be empty',
 					},
-					{ status: 400 },
+					{ status: 400 }
 				);
 			}
 
@@ -180,7 +180,7 @@ class CompileFileEndpoint extends OpenAPIRoute {
 					success: false,
 					error: errorMessage,
 				},
-				{ status: 500 },
+				{ status: 500 }
 			);
 		}
 	}
