@@ -2,7 +2,12 @@
 # Copy this file to .dev.vars and fill in your actual values
 # .dev.vars is gitignored and will not be committed
 
-# JWT Configuration
+# Authentication Toggle
+# Set to 'true' to enable JWT authentication, leave empty or set to 'false' to disable
+# Default: disabled (permissive - useful for development/testing)
+AUTH_ENABLED=true
+
+# JWT Configuration (only required when AUTH_ENABLED=true)
 JWT_ISSUER=https://your-auth-server.com
 PUBLIC_KEY=-----BEGIN PUBLIC KEY-----
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAn4p8qPqs3JRWyVhNm8BO

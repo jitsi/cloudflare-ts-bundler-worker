@@ -5,8 +5,19 @@ import { verifyJWT } from '../utils/jwt-util';
  *
  * Checks for valid Bearer token in Authorization header.
  * Returns 401 if token is missing or invalid.
+ * Can be disabled by setting AUTH_ENABLED environment variable to false or omitting it.
  */
 export const authMiddleware = async (request: Request, env: Env, _ctx: ExecutionContext) => {
+	// Check if authentication is enabled via environment variable
+	// Default is disabled (permissive) - must explicitly set to 'true' to enable
+	const authEnabled = isAuthEnabled(env.AUTH_ENABLED);
+
+	if (!authEnabled) {
+		console.debug('Authentication disabled via AUTH_ENABLED flag');
+		return; // Pass through without authentication
+	}
+
+	console.debug('Authentication enabled - validating JWT token');
 	const authHeader = request.headers.get('Authorization');
 
 	if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -24,4 +35,14 @@ export const authMiddleware = async (request: Request, env: Env, _ctx: Execution
 	// (request as any).jwtPayload = result.payload;
 
 	// Don't return anything - middleware passes request to next handler
+};
+
+/**
+ * Parse AUTH_ENABLED environment variable as boolean
+ * @param value - Environment variable value
+ * @returns true only if value is exactly 'true', false otherwise
+ */
+const isAuthEnabled = (value: string | undefined): boolean => {
+	const ENABLED_VALUE = 'true';
+	return value === ENABLED_VALUE;
 };

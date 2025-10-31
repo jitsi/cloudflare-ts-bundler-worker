@@ -27,14 +27,17 @@ npm run deploy
 
 ### Environment Variables
 
-The worker uses the following environment variables for JWT authentication:
+The worker uses the following environment variables:
 
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `JWT_ISSUER` | Expected issuer claim in JWT tokens | Yes |
-| `PUBLIC_KEY` | RSA public key in PEM format (SPKI) for JWT signature verification | Yes |
+| Variable | Description | Required | Default |
+|----------|-------------|----------|---------|
+| `AUTH_ENABLED` | Enable/disable JWT authentication. Set to `'true'` to enable. | No | `false` (disabled) |
+| `JWT_ISSUER` | Expected issuer claim in JWT tokens | Only when `AUTH_ENABLED=true` | - |
+| `PUBLIC_KEY` | RSA public key in PEM format (SPKI) for JWT signature verification | Only when `AUTH_ENABLED=true` | - |
 
 **Note:** The `PUBLIC_KEY` is a _public_ key and is not sensitive data. Only the corresponding _private_ key (used to sign tokens) needs to be kept secret.
+
+**Security Consideration:** By default, authentication is **disabled** for easier development and testing. For production deployments, it's recommended to set `AUTH_ENABLED=true` to protect your endpoints.
 
 ### Local Development
 
@@ -61,15 +64,26 @@ The worker uses the following environment variables for JWT authentication:
 Set environment variables using Wrangler CLI:
 
 ```bash
-# Set as secrets (recommended for sensitive data)
+# Enable authentication (recommended for production)
+wrangler secret put AUTH_ENABLED
+# When prompted, enter: true
+
+# Set JWT configuration (required when AUTH_ENABLED=true)
 wrangler secret put JWT_ISSUER
 wrangler secret put PUBLIC_KEY
 
 # Or set as regular environment variables
-wrangler deploy --var JWT_ISSUER:https://your-auth-server.com
+wrangler deploy --var AUTH_ENABLED:true --var JWT_ISSUER:https://your-auth-server.com
 ```
 
 Alternatively, use the Cloudflare dashboard to set environment variables in your worker settings.
+
+**For development/testing environments without authentication:**
+```bash
+# Omit AUTH_ENABLED or set it to false
+wrangler deploy
+# Authentication will be disabled by default
+```
 
 ## API Reference
 
