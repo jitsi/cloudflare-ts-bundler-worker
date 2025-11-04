@@ -175,6 +175,7 @@ npm run deploy
 - [ ] 📦 Multiple files support - Bundle entire TypeScript projects with multiple files and dependencies
 - [ ] 📊 Compilation performance metrics and caching
 - [ ] 🔧 Custom esbuild configuration options
+- [ ] 🔐 JWKS (JSON Web Key Set) support for JWT authentication with key rotation
 
 ## License
 
