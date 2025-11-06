@@ -106,6 +106,7 @@ out
 
 .nuxt
 dist
+worker-dist
 
 # Gatsby files
 

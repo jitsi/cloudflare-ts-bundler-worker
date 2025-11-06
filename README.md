@@ -16,29 +16,39 @@ A fast, lightweight Cloudflare Worker that runs esbuild on the edge to compile T
 
 ## Installation
 
-### As an npm package
-
-Install the package from npm:
+This package provides a **pre-built, production-ready** Cloudflare Worker bundle. No build step required!
 
 ```bash
 npm install @jitsi/cf-ts-bundler-worker
 ```
 
-This gives you access to the complete Worker template that you can customize and deploy to your own Cloudflare Workers account.
+The package includes:
+- Minified Worker code (~265 KB)
+- esbuild-wasm module (~12 MB)
+- Source maps for debugging
 
-### Clone from source
+## Quick Start
+
+### Option 1: Deploy using Wrangler (Recommended)
+
+```bash
+# Install the package
+npm install @jitsi/cf-ts-bundler-worker
+
+# Deploy to Cloudflare (no build needed!)
+npx wrangler deploy node_modules/@jitsi/cf-ts-bundler-worker/worker-dist/index.js \
+  --name my-ts-bundler \
+  --compatibility-flag nodejs_compat
+```
+
+### Option 2: Deploy from Source
+
+Clone and customize the Worker:
 
 ```bash
 git clone https://github.com/jitsi/cloudflare-ts-bundler-worker.git
 cd cloudflare-ts-bundler-worker
 npm install
-```
-
-## Quick Start
-
-After installing (either via npm or cloning), deploy to Cloudflare Workers:
-
-```bash
 npm run deploy
 ```
 

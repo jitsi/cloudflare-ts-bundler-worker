@@ -18,23 +18,21 @@
 		"type": "git",
 		"url": "https://github.com/jitsi/cloudflare-ts-bundler-worker"
 	},
-	"main": "./dist/index.js",
-	"types": "./dist/index.d.ts",
+	"main": "./worker-dist/index.js",
 	"exports": {
 		".": {
-			"types": "./dist/index.d.ts",
-			"default": "./dist/index.js"
+			"default": "./worker-dist/index.js"
 		}
 	},
 	"files": [
-		"dist"
+		"worker-dist"
 	],
 	"engines": {
 		"node": ">=18.0.0"
 	},
 	"scripts": {
-		"build": "tsc --project tsconfig.build.json",
-		"clean": "rm -rf dist",
+		"build": "wrangler deploy --dry-run --outdir=worker-dist --minify",
+		"clean": "rm -rf worker-dist",
 		"prepack": "npm run clean && npm run build",
 		"deploy": "wrangler deploy",
 		"dev": "wrangler dev",
