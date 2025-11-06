@@ -14,12 +14,31 @@ A fast, lightweight Cloudflare Worker that runs esbuild on the edge to compile T
 - 📁 File upload support
 - ☁️ Low-latency compilation powered by Cloudflare's global network
 
-## Quick Start
+## Installation
+
+### As an npm package
+
+Install the package from npm:
 
 ```bash
-git clone https://github.com/yourusername/cf-ts-bundler-worker.git
-cd cf-ts-bundler-worker
+npm install @jitsi/cf-ts-bundler-worker
+```
+
+This gives you access to the complete Worker template that you can customize and deploy to your own Cloudflare Workers account.
+
+### Clone from source
+
+```bash
+git clone https://github.com/jitsi/cloudflare-ts-bundler-worker.git
+cd cloudflare-ts-bundler-worker
 npm install
+```
+
+## Quick Start
+
+After installing (either via npm or cloning), deploy to Cloudflare Workers:
+
+```bash
 npm run deploy
 ```
 

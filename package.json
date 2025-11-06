@@ -1,8 +1,41 @@
 {
-	"name": "cf-ts-bundler-worker",
-	"version": "0.0.0",
-	"private": true,
+	"name": "@jitsi/cf-ts-bundler-worker",
+	"version": "1.0.0",
+	"description": "A fast, lightweight Cloudflare Worker that runs esbuild on the edge to compile TypeScript to JavaScript with CDN imports support",
+	"keywords": [
+		"cloudflare",
+		"worker",
+		"typescript",
+		"esbuild",
+		"bundler",
+		"compilation",
+		"edge",
+		"wasm"
+	],
+	"author": "cosmintimis",
+	"license": "Apache-2.0",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/jitsi/cloudflare-ts-bundler-worker"
+	},
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"default": "./dist/index.js"
+		}
+	},
+	"files": [
+		"dist"
+	],
+	"engines": {
+		"node": ">=18.0.0"
+	},
 	"scripts": {
+		"build": "tsc --project tsconfig.build.json",
+		"clean": "rm -rf dist",
+		"prepack": "npm run clean && npm run build",
 		"deploy": "wrangler deploy",
 		"dev": "wrangler dev",
 		"start": "wrangler dev",

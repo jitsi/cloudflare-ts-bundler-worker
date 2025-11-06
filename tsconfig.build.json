@@ -1,0 +1,14 @@
+{
+	"extends": "./tsconfig.json",
+	"compilerOptions": {
+		/* Override base config to enable output */
+		"noEmit": false,
+		"declaration": true,
+		"declarationMap": true,
+		"sourceMap": true,
+		"outDir": "./dist",
+		"rootDir": "./src"
+	},
+	"include": ["src/**/*.ts"],
+	"exclude": ["node_modules", "dist", "test", "**/*.spec.ts", "**/*.test.ts"]
+}
