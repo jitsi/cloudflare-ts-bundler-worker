@@ -57,7 +57,7 @@ jobs:
 
       # Bump version and commit
       - name: "Automated version bump"
-        uses: "phips28/gh-action-bump-version@v11"
+        uses: "phips28/gh-action-bump-version@master"
         with:
           commit-message: 'chore: bump version to {{version}}'
         env:
