@@ -1,6 +1,6 @@
 {
 	"name": "@jitsi/cf-ts-bundler-worker",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "A fast, lightweight Cloudflare Worker that runs esbuild on the edge to compile TypeScript to JavaScript with CDN imports support",
 	"keywords": [
 		"cloudflare",
