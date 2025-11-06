@@ -1,1 +1,68 @@
-# TODO
+name: "Auto-Publish (OIDC)"
+
+# Trigger on push to the 'master' branch
+on:
+  push:
+    branches:
+      - "master"
+
+# OIDC permissions for trusted publishing + contents write for version bump
+permissions:
+  id-token: write  # Required for npm trusted publishing (OIDC)
+  contents: write  # Required to push the version bump commit
+
+jobs:
+  auto-publish:
+    name: "AutoPublish on master"
+    runs-on: ubuntu-latest
+
+    # Stops workflow from re-running after pushing the version bump commit
+    if: "!startsWith(github.event.head_commit.message, 'chore: bump version to')"
+
+    steps:
+      - name: "Checkout source code"
+        uses: "actions/checkout@v4"
+        with:
+          # Fetch full git history needed for version bumping
+          fetch-depth: 0
+
+      - name: "Setup Node.js"
+        uses: "actions/setup-node@v4"
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      # Ensure latest npm version for provenance support
+      - name: "Update npm"
+        run: npm install -g npm@latest
+
+      - name: "Install dependencies"
+        run: npm ci
+
+      # Run checks before publishing
+      - name: "Lint check"
+        run: npm run check
+
+      - name: "Build package"
+        run: npm run build
+
+      - name: "Run tests"
+        run: npm test
+
+      # Configure Git for version bump commit
+      - name: "Configure Git"
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      # Bump version and commit
+      - name: "Automated version bump"
+        uses: "phips28/gh-action-bump-version@v11"
+        with:
+          commit-message: 'chore: bump version to {{version}}'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Publish to npm
+      - name: "Publish to npm"
+        run: npm publish --provenance --access public
