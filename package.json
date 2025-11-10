@@ -53,7 +53,7 @@
 	"dependencies": {
 		"chanfana": "^2.8.2",
 		"esbuild-plugin-cdn-imports": "^2.0.0",
-		"esbuild-wasm": "^0.25.9",
+		"esbuild-wasm": "^0.27.0",
 		"itty-router": "^5.0.22",
 		"jose": "^6.1.0",
 		"nanoid": "^5.1.5",
