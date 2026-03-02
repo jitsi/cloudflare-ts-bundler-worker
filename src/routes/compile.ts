@@ -132,6 +132,7 @@ class CompileFileEndpoint extends OpenAPIRoute {
 			// So we'll parse manually but use the schema for documentation
 			const formData = await request.formData();
 			const file = formData.get('file');
+			const external = formData.getAll('external').map(String).filter(Boolean);
 
 			if (!file || !(file instanceof File)) {
 				return Response.json(
@@ -165,7 +166,7 @@ class CompileFileEndpoint extends OpenAPIRoute {
 			console.debug(`[${requestId}] Using bundler service for compilation`);
 
 			const bundler = await BundlerService.getInstance();
-			const compiledCode = await bundler.compile(code);
+			const compiledCode = await bundler.compile(code, external);
 
 			console.info(`[${requestId}] Compilation successful`, {
 				originalLength: code.length,

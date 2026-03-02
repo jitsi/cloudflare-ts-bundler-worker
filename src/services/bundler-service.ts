@@ -52,7 +52,7 @@ export class BundlerService {
 			},
 			format: 'esm',
 			target: 'es2022',
-			...(external && external.length > 0 ? { external } : {}),
+			...(external?.length ? { external } : {}),
 		});
 		return result.outputFiles[0].text;
 	}

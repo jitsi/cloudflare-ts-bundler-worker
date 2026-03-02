@@ -2,7 +2,11 @@ import { z } from 'zod';
 
 export const CompileRequestSchema = z.object({
 	code: z.string().min(1, 'Code field is required and cannot be empty'),
-	external: z.array(z.string()).optional(),
+	external: z
+		.array(z.string())
+		.optional()
+		.describe('List of module specifiers to mark as external (will not be bundled)')
+		.openapi({ type: 'array', items: { type: 'string' } }),
 });
 
 export const CompileSuccessResponseSchema = z.object({
@@ -19,6 +23,11 @@ export const CompileErrorResponseSchema = z.object({
 export const CompileFileRequestSchema = z
 	.object({
 		file: z.instanceof(File).describe('TypeScript file to compile (.ts)').openapi({ type: 'string', format: 'binary' }),
+		external: z
+			.array(z.string())
+			.optional()
+			.describe('List of module specifiers to mark as external (can be repeated, will not be bundled)')
+			.openapi({ type: 'array', items: { type: 'string' } }),
 	})
 	.openapi({
 		title: 'CompileFileRequest',
