@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 export const CompileRequestSchema = z.object({
 	code: z.string().min(1, 'Code field is required and cannot be empty'),
+	external: z.array(z.string()).optional(),
 });
 
 export const CompileSuccessResponseSchema = z.object({

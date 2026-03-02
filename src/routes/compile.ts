@@ -49,14 +49,14 @@ class CompileEndpoint extends OpenAPIRoute {
 
 		try {
 			const data = await this.getValidatedData<typeof this.schema>();
-			const { code } = data.body;
+			const { code, external } = data.body;
 			console.info(`[${requestId}] Starting TypeScript compilation`, {
 				codeLength: code.length,
 			});
 
 			console.debug(`[${requestId}] Using bundler service for compilation`);
 			const bundler = await BundlerService.getInstance();
-			const compiledCode = await bundler.compile(code);
+			const compiledCode = await bundler.compile(code, external);
 
 			console.info(`[${requestId}] Compilation successful`, {
 				originalLength: code.length,

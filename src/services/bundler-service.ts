@@ -30,7 +30,7 @@ export class BundlerService {
 		this.initialized = true;
 	}
 
-	public async compile(code: string): Promise<string> {
+	public async compile(code: string, external?: string[]): Promise<string> {
 		const result = await esbuild.build({
 			bundle: true,
 			minify: true,
@@ -52,6 +52,7 @@ export class BundlerService {
 			},
 			format: 'esm',
 			target: 'es2022',
+			...(external && external.length > 0 ? { external } : {}),
 		});
 		return result.outputFiles[0].text;
 	}
