@@ -21,13 +21,13 @@ jobs:
 
     steps:
       - name: "Checkout source code"
-        uses: "actions/checkout@v4"
+        uses: "actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5"  # v4
         with:
           # Fetch full git history needed for version bumping
           fetch-depth: 0
 
       - name: "Setup Node.js"
-        uses: "actions/setup-node@v4"
+        uses: "actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020"  # v4
         with:
           node-version: '20'
           registry-url: 'https://registry.npmjs.org'
@@ -57,7 +57,7 @@ jobs:
 
       # Bump version and commit
       - name: "Automated version bump"
-        uses: "phips28/gh-action-bump-version@master"
+        uses: "phips28/gh-action-bump-version@215e27a882516826c59df7f09da8c67d5f375cbd"  # master
         with:
           commit-message: 'chore: bump version to {{version}}'
         env:
